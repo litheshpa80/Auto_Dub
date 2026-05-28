@@ -1,0 +1,46 @@
+# Python Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache and Compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local Environment Variables
+.env
+.env.local
+
+# Web UI / Codex logs and process files
+.codex_*
+.playwright-mcp/
+dubber_out.log
+status_job_*.txt
+
+# Log files
+*.log
+*_log.txt
+*_err.txt
+uvicorn_*.txt
+
+# Large media files (videos, audio, webm)
+*.mp4
+*.wav
+*.webm
+*.avi
+*.mkv
+*.mp3
+
+# Compiled binaries & Executables
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Temporary / Job directories
+*separated/
+separated/
+scratch/

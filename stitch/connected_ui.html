@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniDub AI | Connected UI</title>
+    <meta http-equiv="refresh" content="0; url=code.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b12;
+            --surface: #121827;
+            --text: #eef4ff;
+            --muted: #9aa8bd;
+            --primary: #9fc5ff;
+            --secondary: #7de3c3;
+            --line: rgba(156, 174, 204, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            color: var(--text);
+            font-family: "IBM Plex Sans", sans-serif;
+            background:
+                radial-gradient(circle at 22% 12%, rgba(77, 141, 255, 0.22), transparent 30rem),
+                radial-gradient(circle at 88% 2%, rgba(125, 227, 195, 0.12), transparent 26rem),
+                linear-gradient(180deg, #080b12 0%, #0b101a 52%, #080b12 100%);
+        }
+
+        .panel {
+            width: min(100%, 560px);
+            border: 1px solid var(--line);
+            border-radius: 26px;
+            background: linear-gradient(180deg, rgba(18, 24, 39, 0.94), rgba(13, 17, 28, 0.98));
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            padding: 34px;
+            text-align: center;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 999px;
+            background: rgba(125, 227, 195, 0.08);
+            color: var(--secondary);
+            padding: 8px 12px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .status::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        h1 {
+            margin: 22px 0 12px;
+            font-family: "Sora", sans-serif;
+            font-size: clamp(2rem, 7vw, 3.6rem);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        p {
+            margin: 0 auto 24px;
+            max-width: 420px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            border-radius: 16px;
+            color: #06152f;
+            background: linear-gradient(135deg, #b8d6ff 0%, #6ca4ff 42%, #285fca 100%);
+            padding: 0 20px;
+            font-weight: 900;
+            text-decoration: none;
+            transition: transform 160ms ease, filter 160ms ease;
+        }
+
+        a:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <main class="panel">
+        <div class="status">Connected</div>
+        <h1>UniDub AI</h1>
+        <p>Opening the connected interface.</p>
+        <a href="code.html">Open UniDub AI</a>
+    </main>
+</body>
+</html>

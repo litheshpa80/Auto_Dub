@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Whisper Transcriber</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b12;
+            --surface-1: #0d111c;
+            --surface-2: #121827;
+            --surface-3: #182033;
+            --surface-recessed: #03050a;
+            --text: #eef4ff;
+            --text-muted: #9aa8bd;
+            --primary: #9fc5ff;
+            --primary-strong: #4d8dff;
+            --secondary: #7de3c3;
+            --line: rgba(156, 174, 204, 0.16);
+            --line-strong: rgba(159, 197, 255, 0.36);
+            --danger: #ff827a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            font-family: "IBM Plex Sans", sans-serif;
+            background:
+                radial-gradient(circle at 18% 10%, rgba(77, 141, 255, 0.2), transparent 30rem),
+                radial-gradient(circle at 88% 0%, rgba(125, 227, 195, 0.12), transparent 26rem),
+                linear-gradient(180deg, #080b12 0%, #0b101a 52%, #080b12 100%);
+        }
+
+        .page {
+            width: min(100%, 1120px);
+            margin: 0 auto;
+            padding: 32px 18px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 54px;
+        }
+
+        .brand {
+            font-family: "Sora", sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .status-pill {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--secondary);
+            background: rgba(125, 227, 195, 0.08);
+            padding: 8px 12px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(340px, 0.62fr);
+            align-items: start;
+            gap: 28px;
+        }
+
+        .intro {
+            padding-top: 18px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 18px;
+            color: var(--primary);
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: var(--secondary);
+        }
+
+        h1 {
+            max-width: 720px;
+            margin: 0;
+            font-family: "Sora", sans-serif;
+            font-size: clamp(2.4rem, 8vw, 5.8rem);
+            line-height: 1.02;
+            letter-spacing: -0.045em;
+        }
+
+        .subtitle {
+            max-width: 580px;
+            margin: 24px 0 0;
+            color: var(--text-muted);
+            font-size: 1.03rem;
+            line-height: 1.8;
+        }
+
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 9px;
+            height: 160px;
+            margin-top: 48px;
+            padding: 24px;
+            border-radius: 24px;
+            background: rgba(3, 5, 10, 0.54);
+            border: 1px solid var(--line);
+            overflow: hidden;
+        }
+
+        .bar {
+            width: 12px;
+            min-height: 32px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-strong));
+            animation: equalize 1.5s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        .bar:nth-child(2) { height: 112px; animation-delay: 0.1s; }
+        .bar:nth-child(3) { height: 78px; background: var(--secondary); animation-delay: 0.22s; }
+        .bar:nth-child(4) { height: 128px; animation-delay: 0.34s; }
+        .bar:nth-child(5) { height: 54px; animation-delay: 0.16s; }
+        .bar:nth-child(6) { height: 96px; background: var(--secondary); animation-delay: 0.28s; }
+        .bar:nth-child(7) { height: 70px; animation-delay: 0.4s; }
+
+        @keyframes equalize {
+            0%, 100% { transform: scaleY(0.62); opacity: 0.48; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        .panel {
+            border-radius: 24px;
+            padding: 28px;
+            background:
+                linear-gradient(180deg, rgba(18, 24, 39, 0.94), rgba(13, 17, 28, 0.98)),
+                radial-gradient(circle at top right, rgba(159, 197, 255, 0.12), transparent 22rem);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        input[type="file"],
+        select {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            color: var(--text);
+            background: rgba(3, 5, 10, 0.72);
+            padding: 12px 14px;
+            font: inherit;
+            transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        input[type="file"]::file-selector-button {
+            border: 0;
+            border-radius: 10px;
+            margin-right: 12px;
+            color: #06152f;
+            background: var(--primary);
+            padding: 9px 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        input[type="file"]:focus,
+        select:focus {
+            border-color: var(--line-strong);
+            box-shadow: 0 0 0 3px rgba(77, 141, 255, 0.12);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            min-height: 52px;
+            border: 0;
+            border-radius: 16px;
+            color: #06152f;
+            background: linear-gradient(135deg, #b8d6ff 0%, #6ca4ff 42%, #285fca 100%);
+            font: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+        }
+
+        button:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.52;
+            transform: none;
+        }
+
+        .progress {
+            min-height: 22px;
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .result {
+            min-height: 160px;
+            margin-top: 22px;
+            border-radius: 18px;
+            color: var(--text);
+            background: var(--surface-recessed);
+            border: 1px solid var(--line);
+            padding: 18px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                margin-bottom: 34px;
+            }
+
+            .visualizer {
+                height: 110px;
+                margin-top: 30px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div class="brand">Whisper Transcriber</div>
+            <div class="status-pill">Local UI</div>
+        </header>
+
+        <section class="layout">
+            <div class="intro">
+                <p class="eyebrow">Simple Whisper Transcriber</p>
+                <h1>Whisper Transcriber</h1>
+                <p class="subtitle">Upload an audio or video file, choose the language and task, then process the result through the local transcription endpoint.</p>
+                <div class="visualizer" aria-hidden="true">
+                    <div class="bar" style="height: 82px"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="form-grid">
+                    <div>
+                        <label for="file">Audio/Video File</label>
+                        <input type="file" id="file" accept=".mp3,.wav,.mp4,.m4a,.flac,.ogg,.webm,.avi,.mov,.mkv">
+                    </div>
+
+                    <div>
+                        <label for="language">Language</label>
+                        <select id="language">
+                            <option>Auto-detect Language</option>
+                            <option>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                            <option>German</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="task">Task</label>
+                        <select id="task">
+                            <option value="transcribe">Transcribe</option>
+                            <option value="translate">Translate</option>
+                        </select>
+                    </div>
+
+                    <button id="uploadBtn">Transcribe</button>
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div class="result" id="result"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+    const fileInput = document.getElementById('file');
+    const languageSelect = document.getElementById('language');
+    const taskSelect = document.getElementById('task');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const resultDiv = document.getElementById('result');
+    const progressDiv = document.getElementById('progress');
+
+    uploadBtn.onclick = async () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            resultDiv.textContent = 'Please select a file.';
+            return;
+        }
+        resultDiv.textContent = '';
+        progressDiv.textContent = 'Uploading and transcribing...';
+        uploadBtn.disabled = true;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('language', languageSelect.value);
+        formData.append('task', taskSelect.value);
+        try {
+            const response = await fetch('http://localhost:8001/transcribe/', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            resultDiv.textContent = data.text || JSON.stringify(data);
+        } catch (err) {
+            resultDiv.textContent = 'Error: ' + err;
+        }
+        progressDiv.textContent = '';
+        uploadBtn.disabled = false;
+    };
+    </script>
+</body>
+</html>

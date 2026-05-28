@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniDub AI | AI-Powered Speech to Text</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23080b12'/%3E%3Cpath d='M18 35c7-14 18-18 30-18-1 12-7 23-22 30l-2-8-8-2 2-2Z' fill='%239fc5ff'/%3E%3Ccircle cx='39' cy='25' r='4' fill='%237de3c3'/%3E%3C/svg%3E">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Sora:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "background": "#080b12",
+                    "surface": "#0d111c",
+                    "surface-container-lowest": "#03050a",
+                    "surface-container-low": "#0d111c",
+                    "surface-container": "#121827",
+                    "surface-container-high": "#182033",
+                    "surface-bright": "#202b43",
+                    "on-surface": "#eef4ff",
+                    "on-surface-variant": "#9aa8bd",
+                    "primary": "#9fc5ff",
+                    "primary-dim": "#4d8dff",
+                    "primary-container": "#173a76",
+                    "on-primary": "#06152f",
+                    "secondary": "#7de3c3",
+                    "accent": "#f2c572",
+                    "outline": "#5f718d",
+                    "outline-variant": "#9caecc",
+                    "error": "#ff827a",
+                    "on-error": "#2a0504",
+                    "error-container": "#651f1b",
+                    "on-error-container": "#ffd0cc"
+                },
+                fontFamily: {
+                    "display": ["Sora", "sans-serif"],
+                    "body": ["IBM Plex Sans", "sans-serif"]
+                },
+                boxShadow: {
+                    "studio": "0 24px 70px rgba(0, 0, 0, 0.38)",
+                    "ambient": "0 0 44px rgba(77, 141, 255, 0.16)"
+                },
+                borderRadius: {
+                    "sm": "0.5rem",
+                    "DEFAULT": "0.75rem",
+                    "lg": "1rem",
+                    "xl": "1.25rem",
+                    "2xl": "1.5rem"
+                }
+            }
+        }
+    }
+</script>
+<style>
+    :root {
+        --bg: #080b12;
+        --surface-1: #0d111c;
+        --surface-2: #121827;
+        --surface-3: #182033;
+        --surface-recessed: #03050a;
+        --text: #eef4ff;
+        --text-muted: #9aa8bd;
+        --primary: #9fc5ff;
+        --primary-strong: #4d8dff;
+        --secondary: #7de3c3;
+        --accent: #f2c572;
+        --line: rgba(156, 174, 204, 0.16);
+        --line-strong: rgba(159, 197, 255, 0.36);
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        min-height: 100vh;
+        color: var(--text);
+        font-family: "IBM Plex Sans", sans-serif;
+        background:
+            radial-gradient(circle at 18% 12%, rgba(77, 141, 255, 0.18), transparent 32rem),
+            radial-gradient(circle at 88% 0%, rgba(125, 227, 195, 0.11), transparent 28rem),
+            linear-gradient(180deg, #080b12 0%, #0b101a 48%, #080b12 100%);
+    }
+
+    .font-display {
+        font-family: "Sora", sans-serif;
+    }
+
+    .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 450, "GRAD" 0, "opsz" 24;
+        line-height: 1;
+    }
+
+    .studio-shell {
+        background:
+            linear-gradient(180deg, rgba(18, 24, 39, 0.92), rgba(13, 17, 28, 0.96)),
+            radial-gradient(circle at top right, rgba(159, 197, 255, 0.12), transparent 24rem);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .hero-grid {
+        background-image:
+            linear-gradient(rgba(156, 174, 204, 0.055) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(156, 174, 204, 0.055) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: linear-gradient(to bottom, black 0%, black 62%, transparent 100%);
+    }
+
+    .cta-gradient {
+        background: linear-gradient(135deg, #b8d6ff 0%, #6ca4ff 42%, #285fca 100%);
+        color: #06152f;
+    }
+
+    .cta-gradient:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+    }
+
+    .ghost-line {
+        border: 1px solid var(--line);
+    }
+
+    .field-surface {
+        background: rgba(3, 5, 10, 0.72);
+        border: 1px solid var(--line);
+    }
+
+    .field-surface:focus,
+    .field-surface:focus-visible {
+        border-color: var(--line-strong);
+        box-shadow: 0 0 0 3px rgba(77, 141, 255, 0.12);
+        outline: none;
+    }
+
+    .task-button {
+        min-height: 2.75rem;
+        white-space: nowrap;
+    }
+
+    .wave-bar {
+        animation: equalize 1.45s ease-in-out infinite;
+        transform-origin: bottom;
+    }
+
+    .wave-bar:nth-child(2) { animation-delay: 0.12s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.24s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.36s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.18s; }
+    .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(7) { animation-delay: 0.42s; }
+    .wave-bar:nth-child(8) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(9) { animation-delay: 0.32s; }
+
+    @keyframes equalize {
+        0%, 100% { transform: scaleY(0.58); opacity: 0.42; }
+        50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 7px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(156, 174, 204, 0.28);
+        border-radius: 999px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+<script src="dub_logic.js?v=3"></script>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary/30 selection:text-on-primary">
+<nav class="sticky top-0 z-50 border-b border-outline-variant/10 bg-background/82 backdrop-blur-xl">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <a href="#top" class="font-display text-lg font-bold tracking-tight text-on-surface sm:text-xl">UniDub AI</a>
+        <div class="hidden items-center gap-8 md:flex">
+            <a class="text-sm font-medium text-primary transition-colors duration-200 hover:text-on-surface" href="#features">Features</a>
+            <a class="text-sm font-medium text-on-surface-variant transition-colors duration-200 hover:text-on-surface" href="#">Docs</a>
+            <a class="text-sm font-medium text-on-surface-variant transition-colors duration-200 hover:text-on-surface" href="#">GitHub</a>
+        </div>
+        <a class="cta-gradient inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition-all active:scale-[0.98]" href="#upload-tool">
+            <span class="material-symbols-outlined text-[18px]">upload_file</span>
+            Upload
+        </a>
+    </div>
+</nav>
+
+<main id="top" class="min-h-screen overflow-hidden">
+    <section class="relative px-4 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16">
+        <div class="hero-grid absolute inset-0 pointer-events-none opacity-80"></div>
+        <div class="absolute left-1/2 top-12 h-64 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+                <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-outline-variant/15 bg-surface-container/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                    <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+                    AI-powered speech to text
+                </p>
+                <h1 class="font-display max-w-4xl text-4xl font-extrabold leading-[1.04] tracking-tight text-on-surface sm:text-5xl lg:text-7xl">
+                    AI Speech to Text, Simplified
+                </h1>
+                <p class="mt-6 max-w-2xl text-base leading-8 text-on-surface-variant sm:text-lg">
+                    Accurate transcription and translation from audio and video files. High-performance developer tools for modern workflows.
+                </p>
+                <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                    <a class="cta-gradient inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold transition-all active:scale-[0.98]" href="#upload-tool">
+                        <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+                        Upload File
+                    </a>
+                    <a class="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant/15 bg-surface-container/70 px-6 py-3.5 text-base font-semibold text-on-surface transition-all hover:bg-surface-container-high" href="#features">
+                        <span class="material-symbols-outlined text-[20px] text-primary">auto_awesome</span>
+                        Core Capabilities
+                    </a>
+                </div>
+            </div>
+
+            <div class="studio-shell relative hidden rounded-2xl p-5 sm:p-6 lg:block">
+                <div class="mb-5 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-on-surface-variant">Media Pipeline</p>
+                        <p class="mt-1 text-sm text-on-surface-variant">Transcribe, translate, dub, and preview</p>
+                    </div>
+                    <div class="rounded-full bg-secondary/12 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-secondary">Ready</div>
+                </div>
+                <div class="rounded-xl bg-surface-container-lowest p-5">
+                    <div class="flex h-44 items-end justify-center gap-2 sm:h-56">
+                        <div class="wave-bar h-20 w-2 rounded-full bg-primary/35"></div>
+                        <div class="wave-bar h-36 w-2 rounded-full bg-primary"></div>
+                        <div class="wave-bar h-24 w-2 rounded-full bg-secondary/80"></div>
+                        <div class="wave-bar h-44 w-2 rounded-full bg-primary-dim"></div>
+                        <div class="wave-bar h-28 w-2 rounded-full bg-accent/80"></div>
+                        <div class="wave-bar h-40 w-2 rounded-full bg-primary/80"></div>
+                        <div class="wave-bar h-24 w-2 rounded-full bg-secondary/60"></div>
+                        <div class="wave-bar h-32 w-2 rounded-full bg-primary"></div>
+                        <div class="wave-bar h-16 w-2 rounded-full bg-primary/40"></div>
+                    </div>
+                </div>
+                <div class="mt-5 grid grid-cols-3 gap-3 text-center">
+                    <div class="rounded-xl bg-surface-container-high/70 p-3">
+                        <p class="font-display text-lg font-bold text-on-surface">99+</p>
+                        <p class="text-xs text-on-surface-variant">Languages</p>
+                    </div>
+                    <div class="rounded-xl bg-surface-container-high/70 p-3">
+                        <p class="font-display text-lg font-bold text-on-surface">4</p>
+                        <p class="text-xs text-on-surface-variant">Modes</p>
+                    </div>
+                    <div class="rounded-xl bg-surface-container-high/70 p-3">
+                        <p class="font-display text-lg font-bold text-on-surface">AI</p>
+                        <p class="text-xs text-on-surface-variant">LipSync</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-surface-container-low px-4 py-16 sm:px-6 sm:py-20" id="upload-tool">
+        <div class="mx-auto max-w-5xl">
+            <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-primary">Upload Tool</p>
+                    <h2 class="font-display mt-3 text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">Choose a file and processing mode</h2>
+                </div>
+                <p class="max-w-xl text-sm leading-6 text-on-surface-variant">MP3, WAV, MP4 up to 50MB</p>
+            </div>
+
+            <div class="studio-shell rounded-2xl p-4 sm:p-6 lg:p-8">
+                <div class="group mb-6 cursor-pointer rounded-2xl border-2 border-dashed border-outline-variant/20 bg-surface-container-lowest/72 p-8 text-center transition-all hover:border-primary/45 hover:bg-surface-container-lowest sm:p-12" id="drop-area-box">
+                    <input type="file" id="hidden-file-input" style="display: none;" accept=".mp3,.wav,.mp4,.m4a,.flac,.ogg,.webm,.avi,.mov,.mkv"/>
+                    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/12 text-primary transition-all group-hover:scale-105 group-hover:bg-primary/18">
+                        <span class="material-symbols-outlined text-[34px]">upload_file</span>
+                    </div>
+                    <p class="font-display text-lg font-bold text-on-surface">Click to upload or drag and drop</p>
+                    <p class="mt-2 text-sm text-on-surface-variant">MP3, WAV, MP4 up to 50MB</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1fr_1.25fr]">
+                    <div>
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-on-surface-variant">Language</label>
+                        <select id="language-select" class="field-surface w-full rounded-xl px-4 py-3 text-sm font-medium text-on-surface transition-all">
+                            <option value="">Auto-detect Language</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="kannada">Kannada</option>
+                            <option value="malayalam">Malayalam</option>
+                            <option value="tamil">Tamil</option>
+                            <option value="telugu">Telugu</option>
+                            <option value="marathi">Marathi</option>
+                            <option value="bengali">Bengali</option>
+                            <option value="punjabi">Punjabi</option>
+                            <option value="english">English</option>
+                            <option value="spanish">Spanish</option>
+                            <option value="french">French</option>
+                            <option value="german">German</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="korean">Korean</option>
+                            <option value="arabic">Arabic</option>
+                            <option value="russian">Russian</option>
+                            <option value="portuguese">Portuguese</option>
+                            <option value="italian">Italian</option>
+                            <option value="turkish">Turkish</option>
+                            <option value="vietnamese">Vietnamese</option>
+                            <option value="thai">Thai</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-on-surface-variant">Model Quality</label>
+                        <select id="model-select" class="field-surface w-full rounded-xl px-4 py-3 text-sm font-medium text-on-surface transition-all">
+                            <option value="base">Fast (Base)</option>
+                            <option value="small" selected>Balanced (Small)</option>
+                            <option value="medium">Studio Quality (Medium)</option>
+                            <option value="large-v3">Extreme Quality (Large-v3)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-on-surface-variant">Task Type</label>
+                        <div class="grid grid-cols-2 gap-2 rounded-2xl bg-surface-container-lowest/70 p-1.5 sm:grid-cols-4">
+                            <button data-task-button class="task-button rounded-xl bg-surface-bright px-3 py-2 text-sm font-bold text-on-surface transition-all hover:text-on-surface">Transcribe</button>
+                            <button data-task-button class="task-button rounded-xl px-3 py-2 text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-container-high hover:text-on-surface">Translate</button>
+                            <button data-task-button class="task-button rounded-xl px-3 py-2 text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-container-high hover:text-on-surface">Dub Video</button>
+                            <button data-task-button class="task-button rounded-xl px-3 py-2 text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-container-high hover:text-on-surface">Live Dub</button>
+                        </div>
+                    </div>
+
+                    <div id="lipsync-option" class="hidden">
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-on-surface-variant">Advanced</label>
+                        <div class="field-surface flex min-h-[3rem] items-center gap-3 rounded-xl px-4 py-3">
+                            <input type="checkbox" id="lipsync-checkbox" class="h-4 w-4 rounded border-outline-variant/30 bg-surface-container text-primary focus:ring-primary/40"/>
+                            <label for="lipsync-checkbox" class="cursor-pointer select-none text-sm font-semibold text-on-surface">AI LipSync (Free)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 space-y-2">
+                    <div class="flex justify-between text-xs font-bold uppercase tracking-[0.12em] text-on-surface-variant">
+                        <span>Ready to process</span>
+                        <span>0%</span>
+                    </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-surface-container-lowest">
+                        <div class="h-full w-0 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-1000"></div>
+                    </div>
+                </div>
+
+                <div id="live-dub-controls" class="mt-6 hidden rounded-2xl bg-primary/8 p-6 text-center ring-1 ring-primary/20">
+                    <h3 class="font-display text-lg font-bold text-on-surface">Live Stream Dubbing</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant">Real-time translation and dubbing from your microphone.</p>
+                    <div class="mt-4 mx-auto max-w-[200px] text-left">
+                        <label class="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-on-surface-variant">Target Language</label>
+                        <select id="live-target-language" class="field-surface w-full rounded-xl px-4 py-2 text-sm font-medium text-on-surface transition-all">
+                            <option value="spanish" selected>Spanish</option>
+                            <option value="french">French</option>
+                            <option value="german">German</option>
+                            <option value="italian">Italian</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="korean">Korean</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="russian">Russian</option>
+                            <option value="portuguese">Portuguese</option>
+                        </select>
+                    </div>
+                    <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                        <button id="start-live-btn" class="cta-gradient inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all">
+                            <span class="material-symbols-outlined text-[20px]">mic</span>
+                            Start Live
+                        </button>
+                        <button id="stop-live-btn" class="hidden inline-flex items-center justify-center gap-2 rounded-xl bg-error px-6 py-3 text-sm font-bold text-on-error transition-all hover:brightness-110 disabled:opacity-50">
+                            <span class="material-symbols-outlined text-[20px]">stop_circle</span>
+                            Stop Live
+                        </button>
+                    </div>
+                    <div id="live-status" class="mt-4 hidden animate-pulse text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                        Recording and Dubbing...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-4 py-16 sm:px-6 sm:py-20">
+        <div class="mx-auto max-w-7xl">
+            <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr]">
+                <aside class="lg:sticky lg:top-24 lg:self-start">
+                    <div class="studio-shell rounded-2xl p-5 sm:p-6">
+                        <div class="mb-5 flex items-center justify-between gap-4">
+                            <h3 class="text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant" id="media-header">Media Preview</h3>
+                            <span class="rounded-full bg-surface-container-high px-2.5 py-1 text-xs font-bold text-primary">Preview</span>
+                        </div>
+                        <div id="media-container" class="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-surface-container-lowest">
+                            <div id="placeholder-bars" class="flex h-20 items-end gap-2">
+                                <div class="wave-bar h-10 w-2 rounded-full bg-primary/30"></div>
+                                <div class="wave-bar h-16 w-2 rounded-full bg-primary"></div>
+                                <div class="wave-bar h-9 w-2 rounded-full bg-secondary/70"></div>
+                                <div class="wave-bar h-20 w-2 rounded-full bg-primary-dim"></div>
+                                <div class="wave-bar h-12 w-2 rounded-full bg-accent/70"></div>
+                                <div class="wave-bar h-7 w-2 rounded-full bg-primary/80"></div>
+                            </div>
+                            <video id="video-player" class="hidden h-full w-full" controls></video>
+                        </div>
+                        <div class="mt-5 flex flex-col gap-3">
+                            <button id="download-media-btn" class="cta-gradient hidden w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all">
+                                <span class="material-symbols-outlined text-[20px]">download</span>
+                                Download Dubbed Video
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                <div>
+                    <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant">Transcript</h3>
+                        <div class="flex gap-2">
+                            <button class="inline-flex items-center gap-2 rounded-lg border border-outline-variant/15 bg-surface-container px-3 py-2 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-high">
+                                <span class="material-symbols-outlined text-[17px]">content_copy</span>
+                                Copy
+                            </button>
+                            <button class="inline-flex items-center gap-2 rounded-lg border border-outline-variant/15 bg-surface-container px-3 py-2 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container-high">
+                                <span class="material-symbols-outlined text-[17px]">download</span>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                    <div id="transcript-box" class="custom-scrollbar min-h-[420px] overflow-y-auto whitespace-pre-wrap rounded-2xl bg-surface-container-lowest p-6 text-[0.95rem] leading-8 text-on-surface shadow-studio ring-1 ring-outline-variant/10 sm:p-8">
+<!-- Transcript output will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-surface-container-low px-4 py-16 sm:px-6 sm:py-20">
+        <div class="mx-auto max-w-7xl">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                <div class="rounded-2xl bg-surface-container p-6 transition-all hover:-translate-y-1 hover:bg-surface-container-high">
+                    <span class="font-display text-4xl font-extrabold text-primary/35">01</span>
+                    <h4 class="font-display mt-5 text-xl font-bold text-on-surface">Upload file</h4>
+                    <p class="mt-3 leading-7 text-on-surface-variant">Simply drag your audio or video file into the interface. We support all common formats including MP3, WAV, and MP4.</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container p-6 transition-all hover:-translate-y-1 hover:bg-surface-container-high">
+                    <span class="font-display text-4xl font-extrabold text-primary/35">02</span>
+                    <h4 class="font-display mt-5 text-xl font-bold text-on-surface">AI processes audio</h4>
+                    <p class="mt-3 leading-7 text-on-surface-variant">Our neural engines analyze the acoustic fingerprint and semantic context to provide precise timestamps and text.</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container p-6 transition-all hover:-translate-y-1 hover:bg-surface-container-high">
+                    <span class="font-display text-4xl font-extrabold text-primary/35">03</span>
+                    <h4 class="font-display mt-5 text-xl font-bold text-on-surface">Get transcript</h4>
+                    <p class="mt-3 leading-7 text-on-surface-variant">Receive your high-fidelity transcript in seconds. Export to JSON, TXT, or copy directly to your clipboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-4 py-16 sm:px-6 sm:py-20" id="features">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-12 text-center">
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Core Capabilities</p>
+            </div>
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+                <div class="rounded-2xl bg-surface-container-low p-7 ring-1 ring-outline-variant/10 transition-all hover:-translate-y-1 hover:bg-surface-container">
+                    <span class="material-symbols-outlined mb-6 text-4xl text-primary">precision_manufacturing</span>
+                    <h4 class="font-display text-lg font-bold text-on-surface">Extreme Accuracy</h4>
+                    <p class="mt-3 text-sm leading-7 text-on-surface-variant">State-of-the-art models fine-tuned for diverse accents and technical vocabularies.</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container-low p-7 ring-1 ring-outline-variant/10 transition-all hover:-translate-y-1 hover:bg-surface-container">
+                    <span class="material-symbols-outlined mb-6 text-4xl text-primary">language</span>
+                    <h4 class="font-display text-lg font-bold text-on-surface">99+ Languages</h4>
+                    <p class="mt-3 text-sm leading-7 text-on-surface-variant">Seamless translation and transcription across a global spectrum of languages and dialects.</p>
+                </div>
+                <div class="rounded-2xl bg-surface-container-low p-7 ring-1 ring-outline-variant/10 transition-all hover:-translate-y-1 hover:bg-surface-container">
+                    <span class="material-symbols-outlined mb-6 text-4xl text-primary">bolt</span>
+                    <h4 class="font-display text-lg font-bold text-on-surface">Instant Processing</h4>
+                    <p class="mt-3 text-sm leading-7 text-on-surface-variant">Optimized infrastructure ensures that hour-long recordings are processed in minutes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="border-t border-outline-variant/10 bg-background px-4 py-8 sm:px-6">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
+        <div class="font-display text-lg font-bold text-on-surface">UniDub AI</div>
+        <div class="text-center text-xs font-bold uppercase tracking-[0.12em] text-on-surface-variant">
+            UniDub AI &copy; 2024 - AI-powered speech to text
+        </div>
+        <div class="flex gap-6">
+            <a class="text-xs font-bold uppercase tracking-[0.12em] text-on-surface-variant underline decoration-outline-variant/30 underline-offset-4 transition-all hover:text-primary" href="#">GitHub</a>
+        </div>
+    </div>
+</footer>
+
+<div id="loading-overlay" class="fixed inset-0 z-[100] hidden flex-col items-center justify-center bg-background/86 px-6 text-center backdrop-blur-xl">
+    <div class="mb-6 h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
+    <h2 class="font-display mb-3 text-2xl font-bold text-on-surface sm:text-3xl">AI Processing in Progress...</h2>
+    <p class="max-w-lg text-base leading-8 text-on-surface-variant sm:text-lg">
+        We are securely processing your media locally on your machine.<br/>
+        <span class="font-semibold text-primary">This may take several minutes for videos.</span> Please keep this tab open.
+    </p>
+</div>
+</body>
+</html>
+
